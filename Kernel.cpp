@@ -4,6 +4,18 @@
 #include <vector>
 
 
+// IMPORTANT!!!!! Override the systick hook function with the code from this function
+extern "C" __attribute__((used))
+void SysTick_Handler_code() { // Runs every 1ms as defined in startup.c
+
+	if (Kernel::Sched->enabled == true && ((SCB->ICSR & SCB_ICSR_PENDSVSET_Msk) >> SCB_ICSR_PENDSVSET_Pos) != 1) { // only run if scheduler is enabled and no PendSV interrupt is pending
+	// if (Kernel::Sched->enabled == true) { // only run if scheduler is enabled and no PendSV interrupt is pending
+		PendSV_Trigger(); // Call PendSV to switch context
+	}
+
+}
+
+
 void PendSV_Trigger() {
 	*((uint32_t*)0xE000ED04) |= (1 << 28); // Set PendSV to pending
 }
